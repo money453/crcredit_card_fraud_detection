@@ -1,20 +1,19 @@
 import sys
 import os
 
-# Add the project root directory to sys.path so we can import utils
+# Add the project root directory to sys.path
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
 
 import streamlit as st
 from utils.predictor import predict_transaction
 
-# Streamlit page settings
+# Streamlit page config
 st.set_page_config(page_title="SmartBank Fraud Detection", layout="centered")
 st.title("💳 SmartBank Fraud Detection")
 
 with st.form("fraud_form"):
     st.write("### 📥 Enter Transaction Details")
 
-    # Inputs
     step = st.number_input("Step", min_value=1, value=1)
 
     txn_type_str = st.selectbox("Transaction Type", ["TRANSFER", "CASH_OUT", "DEBIT", "PAYMENT", "CASH_IN"])
@@ -34,7 +33,6 @@ with st.form("fraud_form"):
     newbalanceDest = st.number_input("New Balance Dest", min_value=0.0)
     isFlaggedFraud = st.selectbox("Is Flagged Fraud?", [0, 1])
 
-    # Predict button
     submitted = st.form_submit_button("🚀 Predict Fraud")
 
     if submitted:
@@ -49,12 +47,16 @@ with st.form("fraud_form"):
             "isFlaggedFraud": isFlaggedFraud
         }
 
-        pred, prob = predict_transaction(input_data)
+        try:
+            pred, prob = predict_transaction(input_data)
 
-        st.write(f"🔎 **Prediction:** {'FRAUD' if pred == 1 else 'LEGITIMATE'}")
-        st.write(f"💰 **Transaction Amount:** ₹{amount:,.2f}")
+            st.write(f"🔎 **Prediction:** {'FRAUD' if pred == 1 else 'LEGITIMATE'}")
+            st.write(f"💰 **Transaction Amount:** ₹{amount:,.2f}")
 
-        if pred == 1:
-            st.error(f"⚠️ **FRAUD DETECTED!**\nThis ₹{amount:,.2f} transaction is likely **fraudulent** with confidence **{prob:.2f}**.")
-        else:
-            st.success(f"✅ **LEGITIMATE TRANSACTION**\nThis ₹{amount:,.2f} transaction is predicted **safe** with confidence **{(1 - prob):.2f}**.")
+            if pred == 1:
+                st.error(f"⚠️ **FRAUD DETECTED!**\nThis ₹{amount:,.2f} transaction is likely **fraudulent** with confidence **{prob:.2f}**.")
+            else:
+                st.success(f"✅ **LEGITIMATE TRANSACTION**\nThis ₹{amount:,.2f} transaction is predicted **safe** with confidence **{(1 - prob):.2f}**.")
+
+        except Exception as e:
+            st.error(f"❌ Error: {e}")

@@ -1,18 +1,16 @@
-import pickle
+import joblib
 import pandas as pd
 import os
 from datetime import datetime
-import os
 
 # Create logs directory if not exists
 os.makedirs("logs", exist_ok=True)
 
+# Load the compressed trained model
+MODEL_PATH = os.path.join("assets", "model_compressed.pkl")
+model = joblib.load(MODEL_PATH)
 
-# Load the trained model
-MODEL_PATH = os.path.join("models", "model.pkl")
-with open(MODEL_PATH, "rb") as file:
-    model = pickle.load(file)
-
+# Log file path
 LOG_FILE = os.path.join("logs", "predictions_log.csv")
 
 def log_prediction(input_dict, prediction, probability):
